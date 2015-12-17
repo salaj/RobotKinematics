@@ -68,8 +68,9 @@ namespace RobotKinematics
                 Height = height,
                 Margin = new Thickness(left, top, right, bottom),
                 StrokeThickness = 3,
-                Stroke = Brushes.Green
+                Stroke = Brushes.Green,
             };
+            DragCanvas.SetCanBeDragged(rectangle, true);
         }
 
         public IList<Line> GetLines()

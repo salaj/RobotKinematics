@@ -40,7 +40,7 @@ namespace RobotKinematics
             PreInitialize();
             InitializeColliders();
             InitializeRobot();
-            colliderContainer.GenerateAnglesArray(robot,Canvas,segmentsIntersector);
+            colliderContainer.GenerateAnglesArray(robot, dragCanvas, segmentsIntersector);
             IntializeConfigurationSpace();
             PostInitialize();
             //TestRobotMovement();
@@ -55,7 +55,7 @@ namespace RobotKinematics
 
         private void InitializeRobot()
         {
-            robot = new Robot(Canvas);
+            robot = new Robot(dragCanvas);
             //IList<Line> lines =  robot.GetLines();
             //Canvas.Children.Add(lines[0]);
             //Canvas.Children.Add(lines[1]);
@@ -64,14 +64,14 @@ namespace RobotKinematics
         private void ShowSelectedPosition(Point p)
         {
             robot.CalculateInverseKinematicsSecond(p.X,p.Y);
-            robot.Reset(Canvas);
+            robot.Reset(dragCanvas);
             IList<Line> lines = robot.GetLines();
             foreach (var line in lines)
             {
                  line.Stroke = Brushes.Blue;
             }
-            Canvas.Children.Add(lines[0]);
-            Canvas.Children.Add(lines[1]);
+            dragCanvas.Children.Add(lines[0]);
+            dragCanvas.Children.Add(lines[1]);
         }
 
         private void TestRobotMovement()
@@ -91,7 +91,7 @@ namespace RobotKinematics
         private void InitializeColliders()
         {
             colliderContainer = new ColliderContainer();
-            colliderContainer.GenerateColliders(Canvas);
+            colliderContainer.GenerateColliders(dragCanvas);
         }
 
         private void CheckIntersections()
@@ -129,7 +129,7 @@ namespace RobotKinematics
                         l.Y1 = line.Y1;
                         l.X2 = line.X2;
                         l.Y2 = line.Y2;
-                        Canvas.Children.Add(l);
+                        dragCanvas.Children.Add(l);
                     }
                 }
             }
@@ -137,12 +137,14 @@ namespace RobotKinematics
 
         private void PreInitialize()
         {
+
+            EditorMode = true;
+            AnimationTime = 500;
+
             segmentsIntersector = new SegmentsIntersector();
             mouseSelector = new MouseSelector();
             linearInterpolator = new LinearInterpolator();
-            
 
-            AnimationTime = 500;
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromMilliseconds(10);
             timer.Tick += TimerOnTick;
@@ -157,7 +159,7 @@ namespace RobotKinematics
         private void onAnimationEnded()
         {
             animationPending = false;
-            robot.Update(pathFinder.path[pathFinder.path.Count - 1], Canvas, mouseSelector);
+            robot.Update(pathFinder.path[pathFinder.path.Count - 1], dragCanvas, mouseSelector);
         }
 
         private void TimerOnTick(object sender, EventArgs eventArgs)
@@ -172,7 +174,7 @@ namespace RobotKinematics
             if (normalizedTime >= 0 && normalizedTime <= 1)
             {
                 Point p = linearInterpolator.GetValue(normalizedTime);
-                robot.Update(p, Canvas, mouseSelector);
+                robot.Update(p, dragCanvas, mouseSelector);
             }
             else
             {
@@ -183,14 +185,24 @@ namespace RobotKinematics
 
         private void Canvas_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            Point canvasRelative = Mouse.GetPosition(Canvas);
-            Point origin = new Point(Canvas.Width / 2, Canvas.Height / 2);
+            Point canvasRelative = Mouse.GetPosition(dragCanvas);
+            Point origin = new Point(dragCanvas.Width / 2, dragCanvas.Height / 2);
             Point originRelative = new Point(0,0) + (canvasRelative - origin);
-            
-            mouseSelector.Set(canvasRelative, originRelative, Canvas);
+
+            mouseSelector.Set(canvasRelative, originRelative, dragCanvas);
+
+            if (editorMode)
+            {
+                editorModeLogic();
+            }
         }
 
-        private void OnPlayButtonClicked(object sender, RoutedEventArgs e)
+        private void editorModeLogic()
+        {
+            pathFinder.PresentPossibleSolutions(mouseSelector.StartPosition, segmentsIntersector, dragCanvas);
+        }
+
+        private void animationModeLogic()
         {
             //Resuming after pause
             if (animationPending)
@@ -206,8 +218,8 @@ namespace RobotKinematics
                 //Remove lines
                 if (mouseSelector.FirstLine != null & mouseSelector.SecondLine != null)
                 {
-                    Canvas.Children.Remove(mouseSelector.FirstLine);
-                    Canvas.Children.Remove(mouseSelector.SecondLine);
+                    dragCanvas.Children.Remove(mouseSelector.FirstLine);
+                    dragCanvas.Children.Remove(mouseSelector.SecondLine);
                     mouseSelector.FirstLine = mouseSelector.SecondLine = null;
                 }
                 pathFinder.MoveRobot(mouseSelector.StartPosition, mouseSelector.EndPosition);
@@ -216,6 +228,14 @@ namespace RobotKinematics
             {
                 MessageBox.Show("Select 2 points - start and end configuration");
             }
+        }
+
+        private void OnPlayButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (EditorMode)
+                editorModeLogic();
+            else
+                animationModeLogic();
         }
 
         private void OnPauseButtonClicked(object sender, RoutedEventArgs e)
@@ -233,46 +253,42 @@ namespace RobotKinematics
             //Remove points
             if (mouseSelector.Start != null && mouseSelector.End != null)
             {
-                Canvas.Children.Remove(mouseSelector.Start);
-                Canvas.Children.Remove(mouseSelector.End);
+                dragCanvas.Children.Remove(mouseSelector.Start);
+                dragCanvas.Children.Remove(mouseSelector.End);
                 mouseSelector.Start = mouseSelector.End = null;
             }
 
             //Remove lines
             if (mouseSelector.FirstLine != null & mouseSelector.SecondLine != null)
             {
-                Canvas.Children.Remove(mouseSelector.FirstLine);
-                Canvas.Children.Remove(mouseSelector.SecondLine);
+                dragCanvas.Children.Remove(mouseSelector.FirstLine);
+                dragCanvas.Children.Remove(mouseSelector.SecondLine);
                 mouseSelector.FirstLine = mouseSelector.SecondLine = null;
             }
 
+            //Remove possible area
+            colliderContainer.Reset(dragCanvas);
+
             //Remove visualization of configuration space and generate again
             configurationSpace.Reset();
-            colliderContainer.GenerateAnglesArray(robot, Canvas, segmentsIntersector);
+            colliderContainer.GenerateAnglesArray(robot, dragCanvas, segmentsIntersector);
             configurationSpace.MarkUnreachableCells(colliderContainer.anglesArray);
+
         }
 
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void OnPropertyChanged(string propertyName)
+        private void EditorModeValueChanged(object sender, RoutedEventArgs e)
         {
-            if (PropertyChanged != null)
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-        }
+            RadioButton radioButton =  sender as RadioButton;
 
-        private int animationTime;
-        public int AnimationTime
-        {
-            get { return animationTime; }
-            set
+            if (radioButton.IsChecked.Value)
             {
-                if (value != animationTime)
-                {
-                    animationTime = value;
-                    OnPropertyChanged("AnimationTime");
-                }
+                mouseSelector.EditorMode = true;
             }
+            else
+            {
+                mouseSelector.EditorMode = false;
+            }
+            pathFinder.Reset(dragCanvas);
         }
     }
 }

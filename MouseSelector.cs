@@ -21,12 +21,14 @@ namespace RobotKinematics
         public Line FirstLine { get; set; }
         public Line SecondLine { get; set; }
 
+        public bool EditorMode { get; set; }
+
         private static bool selector = true;
         private int size = 10;
 
         public void Set(Point p, Point originRelative, Canvas canvas)
         {
-            if (selector)
+            if (selector || EditorMode)
             {
                 if (Start != null)
                     canvas.Children.Remove(Start);

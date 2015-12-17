@@ -56,8 +56,10 @@
     <Compile Include="ColliderContainer.cs" />
     <Compile Include="Component.cs" />
     <Compile Include="ConfigurationSpace.cs" />
+    <Compile Include="DragCanvas.cs" />
     <Compile Include="ExtendedRectangle.cs" />
     <Compile Include="LinearInterpolator.cs" />
+    <Compile Include="MainWindowProperties.cs" />
     <Compile Include="MouseSelector.cs" />
     <Compile Include="PathFinder.cs" />
     <Compile Include="Robot.cs" />
