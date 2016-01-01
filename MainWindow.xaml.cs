@@ -55,7 +55,7 @@ namespace RobotKinematics
 
         private void InitializeRobot()
         {
-            robot = new Robot(dragCanvas);
+            robot = new Robot(dragCanvas, l1, l2);
             //IList<Line> lines =  robot.GetLines();
             //Canvas.Children.Add(lines[0]);
             //Canvas.Children.Add(lines[1]);
@@ -64,7 +64,7 @@ namespace RobotKinematics
         private void ShowSelectedPosition(Point p)
         {
             robot.CalculateInverseKinematicsSecond(p.X,p.Y);
-            robot.Reset(dragCanvas);
+            robot.Reset(dragCanvas, l1, l2);
             IList<Line> lines = robot.GetLines();
             foreach (var line in lines)
             {
@@ -140,6 +140,8 @@ namespace RobotKinematics
 
             EditorMode = true;
             AnimationTime = 500;
+            l1 = 100;
+            l2 = 100;
 
             segmentsIntersector = new SegmentsIntersector();
             mouseSelector = new MouseSelector();

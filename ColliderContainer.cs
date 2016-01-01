@@ -15,7 +15,7 @@ namespace RobotKinematics
         public IList<ExtendedRectangle> Colliders;
         private IList<Line> lineContainer; 
         public bool[,] anglesArray { get; set; }
-        private int N = 3;
+        private int N = 4;
         int maxAngle = 360;
         private Random rand;
         public ColliderContainer()
@@ -86,7 +86,7 @@ namespace RobotKinematics
                 for (int j = 0; j < maxAngle; j++)
                 {
                     robot.UpdateAngles(i, j);
-                    robot.Reset(Canvas);
+                    robot.Reset(Canvas, robot.first.l, robot.second.l);
                     Line firstLine = robot.GetLines()[0];
                     Line secondLine = robot.GetLines()[1];
                     bool sentinel = false;

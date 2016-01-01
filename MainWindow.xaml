@@ -36,6 +36,15 @@
                 </StackPanel>
 
             </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Length of first arm"></Label>
+                <TextBox VerticalAlignment="Center" Name="FirstArm" Text="{Binding Path=L1, UpdateSourceTrigger=PropertyChanged}" Width="50" Margin="20,0,20,10" HorizontalAlignment="Left"></TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Length of second arm"></Label>
+                <TextBox VerticalAlignment="Center" Name="SecondArm" Text="{Binding Path=L2, UpdateSourceTrigger=PropertyChanged}" Width="50" Margin="20,0,20,10" HorizontalAlignment="Left"></TextBox>
+            </StackPanel>
         </StackPanel>
     </Grid>
 </Window>

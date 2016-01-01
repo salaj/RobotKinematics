@@ -18,12 +18,12 @@ namespace RobotKinematics
         public double Fi2 { get; set; }
 
         
-        public Robot(Canvas canvas)
+        public Robot(Canvas canvas, double l1, double l2)
         {
             double fi1 = 30;
             double fi2 = 20;
             UpdateAngles(fi1, fi2);
-            Reset(canvas);
+            Reset(canvas, l1, l2);
         }
 
         public void UpdateAngles(double fi1, double fi2)
@@ -32,20 +32,20 @@ namespace RobotKinematics
             Fi2 = Math.PI * fi2 / 180.0f;
         }
 
-        public void Reset(Canvas canvas)
+        public void Reset(Canvas canvas, double l1 , double l2)
         {
             first = new Component()
             {
                 Fi0 = 0,
                 Fi = Fi1,
-                l = 100,
+                l = l1,
                 Start = new Point(canvas.Width / 2, canvas.Height / 2)//new Point(0,0)
             };
             second = new Component()
             {
                 Fi0 = Fi1,
                 Fi = Fi2,
-                l = 100
+                l = l2
             };
         }
 
@@ -64,7 +64,7 @@ namespace RobotKinematics
         public void Update(Point p, Canvas canvas, MouseSelector mouseSelector)
         {
             UpdateAngles(p.X, p.Y);
-            Reset(canvas);
+            Reset(canvas, first.l, second.l);
 
 
             if (mouseSelector.FirstLine != null & mouseSelector.SecondLine != null)

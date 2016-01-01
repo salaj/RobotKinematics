@@ -69,6 +69,7 @@ namespace RobotKinematics
                 Margin = new Thickness(left, top, right, bottom),
                 StrokeThickness = 3,
                 Stroke = Brushes.Green,
+                Fill = new SolidColorBrush(Colors.DarkCyan)
             };
             DragCanvas.SetCanBeDragged(rectangle, true);
         }

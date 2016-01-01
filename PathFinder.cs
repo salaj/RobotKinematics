@@ -14,7 +14,9 @@ namespace RobotKinematics
     public enum Strategy
     {
         First,
-        Second
+        Second,
+        Cross1,
+        Cross2
     }
     public class PathFinder
     {
@@ -80,7 +82,7 @@ namespace RobotKinematics
                 return;
             }
 
-            robot.Reset(dragCanvas);
+            robot.Reset(dragCanvas, robot.first.l, robot.second.l);
             bool isCollision = colliderContainer.CheckCollision(robot, segmentsIntersector);
             if (isCollision)
             {
@@ -130,11 +132,23 @@ namespace RobotKinematics
                 startAngles = robot.CalculateInverseKinematicsSecond(start.X, start.Y);
                 endAngles = robot.CalculateInverseKinematicsSecond(end.X, end.Y);
             }
-            else
+            else if(strategy == Strategy.First)
             {
                 startAngles = robot.CalculateInverseKinematicsFirst(start.X, start.Y);
                 endAngles = robot.CalculateInverseKinematicsFirst(end.X, end.Y);
             }
+            else if (strategy == Strategy.Cross1)
+            {
+                startAngles = robot.CalculateInverseKinematicsFirst(start.X, start.Y);
+                endAngles = robot.CalculateInverseKinematicsSecond(end.X, end.Y);
+            }
+            else if (strategy == Strategy.Cross2)
+            {
+                startAngles = robot.CalculateInverseKinematicsSecond(start.X, start.Y);
+                endAngles = robot.CalculateInverseKinematicsFirst(end.X, end.Y);
+            }
+
+
 
             if (Double.IsNaN(startAngles.X) || Double.IsNaN(startAngles.Y) || Double.IsNaN(endAngles.X) || Double.IsNaN(endAngles.Y))
             {
@@ -169,6 +183,14 @@ namespace RobotKinematics
             else if (strategy == Strategy.First)
             {
                 MoveRobot(start, end, Strategy.Second);
+            }
+            else if (strategy == Strategy.Second)
+            {
+                MoveRobot(start, end, Strategy.Cross1);
+            }
+            else if (strategy == Strategy.Cross1)
+            {
+                MoveRobot(start, end, Strategy.Cross2);
             }
             else
             {
